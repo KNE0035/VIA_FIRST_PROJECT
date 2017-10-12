@@ -69,17 +69,36 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
     #sideBar nav a {font-size: 18px;}
 }
 
-#schedule{
+table{
     border: 2px solid black;
     border-collapse: collapse;
     background-color: #FFFFFF;
     margin: 1em 0;
 }
 
-#schedule td{
-    border: 1px solid black;
+table td{
+    border: 1px solid grey;
     padding: 5px;
     margin: 0;
     font-size: 11px;
-    font-size: 17px;]
+    font-size: 17px;
+}
+
+table tr:first-child td{
+    background-color: #777777;
+    color: white;
+    border-color: white;
+}
+
+#schedule tr td:first-child{
+    background-color: #777777;
+    color: white;
+    border-color: white;
+}
+
+#schedule .excercise{
+
+    border: 1px solid blue;
+    border-style: double;
+    background: #ddddff;
 }
