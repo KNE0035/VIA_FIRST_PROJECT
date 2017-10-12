@@ -69,14 +69,14 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
     #sideBar nav a {font-size: 18px;}
 }
 
-table{
+#schedule{
     border: 2px solid black;
     border-collapse: collapse;
     background-color: #FFFFFF;
     margin: 1em 0;
 }
 
-table td{
+#schedule td{
     border: 1px solid black;
     padding: 5px;
     margin: 0;
