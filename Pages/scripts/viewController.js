@@ -2,6 +2,9 @@ $( document ).ready(function() {
     console.log( "ready!" );
     $("#header").load("navigationSegments/topNav.html");
     $("#sideBar").load("navigationSegments/homeSideBar.html");
+
+
+
 });
 
 

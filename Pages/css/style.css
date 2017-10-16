@@ -1,3 +1,8 @@
+*{
+    margin: 0px;
+    padding: 0px;
+}
+
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
 /*header*/
 #topnav {
@@ -18,14 +23,8 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
 
 /* Change the color of links on hover */
 #topnav a:hover {
-    background-color: #ddd;
+    background-color: #FFF !important;
     color: black;
-}
-
-/* Add a color to the active/current link */
-#topnav a.active {
-    background-color: #4CAF50;
-    color: white;
 }
 
 /*sideBar*/
@@ -34,40 +33,36 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
     width: 250px;
     position: fixed;
     z-index: 3;
-    top: 56px;
+    top: 48px;
     bottom: 0px;
-    background-color: #111;
+    padding-top: 30px;
     overflow-x: hidden;
     transition: 0.5s;
-    padding-top: 60px;
     background-color: #f0f0f0 !important;
 }
 
+#sideBar {
+    z-index: 3;
+    width: 250px;
+    top: 43px;
+    bottom: 0;
+    height: inherit;
+}
+
 #sideBar nav a {
-    padding: 8px 8px 8px 32px;
+    padding: 4px 4px 4px 10px;
     text-decoration: none;
-    font-size: 25px;
-    color: #818181;
+    font-size: 20px;
+    color: #000;
     display: block;
     transition: 0.3s;
 }
 
-#sideBar nav a:hover {
-    color: #f1f1f1;
+#sideBar  a:hover {
+    background-color: #000;
+    color: #FFFFFF;
 }
 
-#sideBar nav .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
-}
-
-@media screen and (max-height: 450px) {
-    #sideBar nav {padding-top: 15px;}
-    #sideBar nav a {font-size: 18px;}
-}
 
 table{
     border: 2px solid black;
@@ -97,7 +92,6 @@ table tr:first-child td{
 }
 
 #schedule .excercise{
-
     border: 1px solid blue;
     border-style: double;
     background: #ddddff;
