@@ -108,7 +108,7 @@ function ViewController () {
             $("#yearFromSelection").addClass("inputInvalid");
         }
 
-        if (validationObj.wrongToYear) {
+        if (validationObj.wrongFromYear) {
             validationMessages.push("Please select valid from year");
             $("#yearFromSelection").addClass("inputInvalid");
         }

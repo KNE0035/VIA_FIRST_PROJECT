@@ -133,7 +133,7 @@ function WeatherService() {
             validationObj.wrongFromYear = true;
         }
 
-        if(!fromYear){
+        if(!toYear){
             validationObj.wrongToYear = true;
         }
 
