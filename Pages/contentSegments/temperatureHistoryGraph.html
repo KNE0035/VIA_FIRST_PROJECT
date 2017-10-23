@@ -1,0 +1,25 @@
+<div>
+    <h2>
+        Zvolte prosím pro jakou zem a časový interval chcete vygenerovat graf historie změny teploty
+    </h2>
+
+    <form id="basicGraphFilter">
+        <label for="countrySelection">Země:</label>
+        <select id="countrySelection" name="countrySelection">
+            <option value="" selected>Vyberte zemi</option>
+        </select>
+
+        <label for="yearFromSelection">Od roku:</label>
+        <select id="yearFromSelection" name="yearFromSelection">
+            <option value="no selected">Nevybráno</option>
+        </select>
+
+        <label for="yearToSelection">Do roku</label>
+        <select id="yearToSelection" name="yearToSelection">
+            <option value="no selected">Nevybráno</option>
+        </select>
+        <br>
+        <input type="button" value="Sumbit" onclick="viewController.drawHistoryTemperatureGraph()">
+    </form>
+    <div id="temperatureHistoryGraph"></div>
+</div>

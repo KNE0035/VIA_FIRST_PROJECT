@@ -1,0 +1,20 @@
+<div>
+    <h2>
+        Zvolte prosím časový interval pro který chcete vygenerovat globální graf historie změny teploty
+    </h2>
+
+    <form id="basicGraphFilter">
+        <label for="yearFromSelection">Od roku:</label>
+        <select id="yearFromSelection" name="yearFromSelection">
+            <option value="no selected">Nevybráno</option>
+        </select>
+
+        <label for="yearToSelection">Do roku:</label>
+        <select id="yearToSelection" name="yearToSelection">
+            <option value="no selected">Nevybráno</option>
+        </select>
+        <br>
+        <input type="button" value="Sumbit" onclick="viewController.drawGlobalHistoryTemperatureGraph()">
+    </form>
+    <div id="globalHistoryTemperatureGraph"></div>
+</div>

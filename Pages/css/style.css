@@ -131,3 +131,10 @@ input[type=submit]:hover {
 .inputInvalid {
     border: red 1px solid;
 }
+
+/*content*/
+#content{
+    margin-left: 300px;
+    margin-right: 100px;
+    margin-top: 50px;
+}

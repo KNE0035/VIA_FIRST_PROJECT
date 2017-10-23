@@ -33,7 +33,7 @@ function ViewController () {
 
         if (linkValue === "home" || linkValue === "schedule" || linkValue === "contact" || linkValue === "baseInfo" || linkValue == "index") {
             $("#sideBar").load("navigationSegments/homeSideBar.html");
-        } else if (linkValue === "weatherGraphs") {
+        } else {
             $("#sideBar").load("navigationSegments/weatherGraphsSideBar.html");
         }
 
@@ -50,27 +50,48 @@ function ViewController () {
                 $("#content").load("contentSegments/contact.html");
                 break;
             case "weatherGraphs":
-            case "temperatureHistoricGraphs":
-                resolveViewFortemperatureHistoricGraphsContent();
+            case "temperatureHistoryGraph":
+                resolveViewForTemperatureHistoryGraphContent();
+                break;
+            case "precipitationHistoryGraph":
+                resolveViewForPrecipitationHistoryGraphContent();
+                break;
+            case "globalTemperatureGraph":
+                resolveViewForGlobalTemperatureHistoryGraphContent();
                 break;
         }
     }
 
-    function resolveViewFortemperatureHistoricGraphsContent() {
-        $("#content").load("contentSegments/temperatureHistoricGraphs.html", function () {
-            weatherService.getPossibleCountriesToSelect(function (countries) {
-                countries.forEach(function (country) {
-                    addOptionToSelection(country.name, country.alpha3Code, $("#countrySelection"));
-                });
+    function initBasicWeatherFilters() {
+        weatherService.getPossibleCountriesToSelect(function (countries) {
+            countries.forEach(function (country) {
+                addOptionToSelection(country.name, country.alpha3Code, $("#countrySelection"));
             });
+        });
 
-            yearsToSelect = weatherService.getYearDataToSelect();
+        yearsToSelect = weatherService.getYearDataToSelect();
 
-            yearsToSelect.forEach(function (year) {
-                addOptionToSelection(year, year, $("#yearFromSelection"));
-                addOptionToSelection(year, year, $("#yearToSelection"));
-            })
+        yearsToSelect.forEach(function (year) {
+            addOptionToSelection(year, year, $("#yearFromSelection"));
+            addOptionToSelection(year, year, $("#yearToSelection"));
+        })
+    }
 
+    function resolveViewForTemperatureHistoryGraphContent() {
+        $("#content").load("contentSegments/temperatureHistoryGraph.html", function () {
+            initBasicWeatherFilters();
+        });
+    }
+
+    function resolveViewForPrecipitationHistoryGraphContent() {
+        $("#content").load("contentSegments/precipitationHistoryGraph.html", function () {
+            initBasicWeatherFilters();
+        });
+    }
+
+    function resolveViewForGlobalTemperatureHistoryGraphContent() {
+        $("#content").load("contentSegments/globalTemperatureHistoryGraph.html", function () {
+            initBasicWeatherFilters();
         });
     }
 
@@ -81,8 +102,8 @@ function ViewController () {
         selection.append(opt);
     }
 
-    ViewController.prototype.drawHistoryTemperatureGraph = function () {
-        weatherService.getHistoryTemperatureDataByCriteria({ country: $( "#countrySelection" ).val(), fromYear: $( "#yearFromSelection" ).val(), toYear: $( "#yearToSelection" ).val()},function (historyTemperatureData, validationObj) {
+    ViewController.prototype.drawHistoryPrecipitationGraph = function () {
+        weatherService.getHistoryWeatherDataByCriteria({ country: $( "#countrySelection" ).val(), fromYear: $( "#yearFromSelection" ).val(), toYear: $( "#yearToSelection" ).val()},function (historyTemperatureData, validationObj) {
             $( "#countrySelection" ).removeClass( "inputInvalid" );
             $( "#yearFromSelection" ).removeClass( "inputInvalid" );
             $( "#yearToSelection" ).removeClass( "inputInvalid" );
@@ -90,9 +111,38 @@ function ViewController () {
             if(!validationObj.isValid){
                 resolveValidationMesseages(validationObj);
             } else {
-                drawHistoryTemperatureGraph(historyTemperatureData);
+                drawHistoryWeatherGraph(historyTemperatureData, "precipitationHistoryGraph", PRECIPITATION_TYPE_CHANGE, 'Graf vývoje průměrné hodnoty srážek za rok, týkající se země: ' + $("#countrySelection option:selected").text());
             }
-        })
+        }, PRECIPITATION_TYPE_CHANGE)
+    }
+
+
+    ViewController.prototype.drawGlobalHistoryTemperatureGraph = function () {
+        weatherService.getGlobalHistoryWeatherDataByCriteria({ fromYear: $( "#yearFromSelection" ).val(), toYear: $( "#yearToSelection" ).val()},function (globalHistoryTemperatureData, validationObj) {
+            $( "#yearFromSelection" ).removeClass( "inputInvalid" );
+            $( "#yearToSelection" ).removeClass( "inputInvalid" );
+
+            if(!validationObj.isValid){
+                resolveValidationMesseages(validationObj);
+            } else {
+                drawHistoryWeatherGraph(globalHistoryTemperatureData, "globalHistoryTemperatureGraph", TEMPERATURE_TYPE_CHANGE, 'Globální graf vývoje průměrné teploty za rok')
+            }
+        }, TEMPERATURE_TYPE_CHANGE)
+    }
+
+
+    ViewController.prototype.drawHistoryTemperatureGraph = function () {
+        weatherService.getHistoryWeatherDataByCriteria({ country: $( "#countrySelection" ).val(), fromYear: $( "#yearFromSelection" ).val(), toYear: $( "#yearToSelection" ).val()},function (historyTemperatureData, validationObj) {
+            $( "#countrySelection" ).removeClass( "inputInvalid" );
+            $( "#yearFromSelection" ).removeClass( "inputInvalid" );
+            $( "#yearToSelection" ).removeClass( "inputInvalid" );
+
+            if(!validationObj.isValid){
+                resolveValidationMesseages(validationObj);
+            } else {
+                drawHistoryWeatherGraph(historyTemperatureData, "temperatureHistoryGraph", TEMPERATURE_TYPE_CHANGE, 'Graf vývoje průměrné teploty za rok, týkající se země: ' + $("#countrySelection option:selected").text());
+            }
+        }, TEMPERATURE_TYPE_CHANGE)
     }
 
     function resolveValidationMesseages(validationObj) {
@@ -130,15 +180,15 @@ function ViewController () {
         })
     }
 
-    function drawHistoryTemperatureGraph(historyTemperatureData) {
+    function drawHistoryWeatherGraph(historyWeatherData, graphId, typeOfChange, graphTitle) {
         google.charts.load('current', {'packages':['corechart']});
         google.charts.setOnLoadCallback(function () {
             var data = new google.visualization.DataTable();
-            data.addColumn('number', 'Year');
-            data.addColumn('number', 'Temperature');
+            data.addColumn('number', 'Rok');
+            data.addColumn('number', typeOfChange === TEMPERATURE_TYPE_CHANGE ? 'Teplota' : 'Srážky');
 
             dataForGraph = [];
-            historyTemperatureData.forEach(function (item) {
+            historyWeatherData.forEach(function (item) {
                 dataForGraph.push([item.year, item.data]);
             });
 
@@ -146,28 +196,25 @@ function ViewController () {
                 dataForGraph
             );
 
-            var options = {'title':'Historic yearly average temperature graph from ' + $("#countrySelection option:selected").text(),
-                'width':1500,
+            var options = {'title': graphTitle,
                 'height':300,
 
                 hAxis: {
-                    title: 'Year',
+                    title: 'Rok',
                     titleTextStyle: {
                         fontSize: 16,
-                        bold: true
                     }
                 },
                 vAxis: {
-                    title: '% Celosia',
+                    title: typeOfChange === TEMPERATURE_TYPE_CHANGE ? "% Celosia" : "Srážky v mm vody",
                     titleTextStyle: {
                         fontSize: 16,
-                        bold: true
                     }
                 }
             };
 
             // Instantiate and draw our chart, passing in some options.
-            var chart = new google.visualization.LineChart(document.getElementById('temperatureHistoryGraph'));
+            var chart = new google.visualization.LineChart(document.getElementById(graphId));
             chart.draw(data, options);
         });
     }

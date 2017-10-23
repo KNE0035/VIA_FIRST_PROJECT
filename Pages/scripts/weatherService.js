@@ -1,79 +1,32 @@
+const TEMPERATURE_TYPE_CHANGE = "temperature";
+const PRECIPITATION_TYPE_CHANGE = "precipitation";
+
 function WeatherService() {
     const COUNTRY_CACHE = "POSSIBLE_COUNTRIES";
 
-    /*function timeConverter(UNIX_timestamp){
-        var a = new Date(UNIX_timestamp * 1000);
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        var year = a.getFullYear();
-        var month = months[a.getMonth()];
-        var date = a.getDate();
-        var hour = a.getHours();
-        var min = a.getMinutes();
-        var sec = a.getSeconds();
-        var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-        return time;
-    }
+    var possibleCountriesToSelect = [];
+    var allCountriesWeatherData = [];
 
-    function drawChart() {
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Topping');
-        data.addColumn('number', 'Slices');
-        data.addRows([
-            ['Mushrooms', 3],
-            ['Onions', 1],
-            ['Olives', 1],
-            ['Zucchini', 1],
-            ['Pepperoni', 2]
-        ]);
-
-        // Set chart options
-        var options = {'title':'How Much Pizza I Ate Last Night',
-            'width':500,
-            'height':300};
-
-        // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Topping');
-        data.addColumn('number', 'Slices');
-        data.addRows([
-            ['Mushrooms', 3],
-            ['Onions', 1],
-            ['Olives', 1],
-            ['Zucchini', 1],
-            ['Pepperoni', 2]
-        ]);
-
-        // Set chart options
-        var options = {'title':'How Much Pizza I Ate Last Night',
-            'width':500,
-            'height':300};
-
-        // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-    }*/
+    //const COUNTRIES_ALPHA_3_CODE_TO_GET_GLOBAL_DATA = ["CZE", "FRA", "ESP"
+    //                                                    ,""]
 
     WeatherService.prototype.getPossibleCountriesToSelect = function(viewCallback){
         if(localStorage.getItem(COUNTRY_CACHE)){
-            var possibleCountries = JSON.parse(localStorage.getItem(COUNTRY_CACHE));
-            viewCallback(possibleCountries);
+            possibleCountriesToSelect = JSON.parse(localStorage.getItem(COUNTRY_CACHE));
+            viewCallback(possibleCountriesToSelect);
         } else {
             $.ajax({
                 url: "https://restcountries.eu/rest/v2/all",
                 dataType: 'json'
             }).done(function (data) {
-                var possibleCountries = [];
                 data.forEach(function (country) {
                     var possibleCountry = {};
                     possibleCountry.name = country.name;
                     possibleCountry.alpha3Code = country.alpha3Code;
-                    possibleCountries.push(possibleCountry);
+                    possibleCountriesToSelect.push(possibleCountry);
                 })
-                localStorage.setItem(COUNTRY_CACHE, JSON.stringify(possibleCountries));
-                viewCallback(possibleCountries);
+                localStorage.setItem(COUNTRY_CACHE, JSON.stringify(possibleCountriesToSelect));
+                viewCallback(possibleCountriesToSelect);
             });
         }
     }
@@ -86,15 +39,68 @@ function WeatherService() {
         return yearSet;
     }
 
-    WeatherService.prototype.getHistoryTemperatureDataByCriteria = function (weatherCriteria, viewCallback) {
-        var validationObj = validateTemperatureFilters(weatherCriteria);
+    WeatherService.prototype.getGlobalHistoryWeatherDataByCriteria = function (weatherCriteria, viewCallback, typeOfChange) {
+        var validationObj = validateWeatherFilters(weatherCriteria);
+        var globalHistoryWeatherData = [];
+        if(!validationObj.isValid){
+            viewCallback(globalHistoryWeatherData, validationObj);
+            return;
+        }
+
+        var baseUrlWithCriteria;
+        if(typeOfChange === TEMPERATURE_TYPE_CHANGE){
+            baseUrlWithCriteria = "http://climatedataapi.worldbank.org/climateweb/rest/v1/country/cru/tas/year/";
+        } else if(typeOfChange === PRECIPITATION_TYPE_CHANGE){
+            baseUrlWithCriteria = "http://climatedataapi.worldbank.org/climateweb/rest/v1/country/cru/pr/year/";
+        }
+
+        allCountriesWeatherData = [];
+
+        possibleCountriesToSelect.forEach(function (country) {
+            $.ajax({
+                url: baseUrlWithCriteria + country.alpha3Code,
+                dataType: 'json'
+            }).done(function (data) {
+                var countryWeatherData = [];
+                var historyWeatherData = [];
+                var fromYear = parseInt(weatherCriteria.fromYear);
+                var toYear = parseInt(weatherCriteria.toYear);
+
+                data.forEach(function (item) {
+                    if(item.year >= fromYear && item.year <= toYear){
+                        countryWeatherData.push(item);
+                    }
+                })
+
+                allCountriesWeatherData.push(countryWeatherData);
+            });
+        });
+
+        $(document).ajaxStop(function() {
+            if(allCountriesWeatherData.length > 0){
+                var globalWeatherData = getAggregateCountriesDataToGlobalAverage(allCountriesWeatherData);
+
+                viewCallback(globalWeatherData, validationObj);
+            }
+        });
+
+    }
+
+    WeatherService.prototype.getHistoryWeatherDataByCriteria = function (weatherCriteria, viewCallback, typeOfChange) {
+        var validationObj = validateWeatherFilters(weatherCriteria);
         var historyWeatherData = [];
         if(!validationObj.isValid){
             viewCallback(historyWeatherData, validationObj);
             return;
         }
 
-        urlWithCriteria = "http://climatedataapi.worldbank.org/climateweb/rest/v1/country/cru/tas/year/" + weatherCriteria.country;
+        var urlWithCriteria;
+        if(typeOfChange === TEMPERATURE_TYPE_CHANGE){
+            urlWithCriteria = "http://climatedataapi.worldbank.org/climateweb/rest/v1/country/cru/tas/year/" + weatherCriteria.country;
+        } else if(typeOfChange === PRECIPITATION_TYPE_CHANGE){
+            urlWithCriteria = "http://climatedataapi.worldbank.org/climateweb/rest/v1/country/cru/pr/year/" + weatherCriteria.country;
+        }
+
         $.ajax({
             url: urlWithCriteria,
             dataType: 'json'
@@ -111,9 +117,11 @@ function WeatherService() {
 
             viewCallback(historyWeatherData, validationObj);
         });
+
+
     }
 
-    function validateTemperatureFilters(weatherCriteria){
+    function validateWeatherFilters(weatherCriteria){
         var fromYear = parseInt(weatherCriteria.fromYear);
         var toYear = parseInt(weatherCriteria.toYear);
         var countryAlpha3Code = weatherCriteria.country;
@@ -125,9 +133,13 @@ function WeatherService() {
             validationObj.wrongYearInterval = true;
         }
 
-        if(countryAlpha3Code.length <= 0){
-            validationObj.wrongCountry = true;
+
+        if(countryAlpha3Code != undefined){
+            if(countryAlpha3Code.length <= 0){
+                validationObj.wrongCountry = true;
+            }
         }
+
 
         if(!fromYear){
             validationObj.wrongFromYear = true;
@@ -146,5 +158,27 @@ function WeatherService() {
         }
 
         return validationObj;
+    }
+
+    function getAggregateCountriesDataToGlobalAverage(allCountriesWeatherData){
+        var globalWeatherData = [];
+        var countOfCountriesWithNoData = 0;
+        allCountriesWeatherData.forEach(function (countryWeatherData) {
+            if(countryWeatherData.length == 0){
+                countOfCountriesWithNoData++;
+            }
+            for(var i = 0; i < countryWeatherData.length; i++){
+                if(globalWeatherData[i]){
+                    globalWeatherData[i].data = globalWeatherData[i].data + countryWeatherData[i].data;
+                } else {
+                    globalWeatherData[i] = {year: countryWeatherData[i].year, data: countryWeatherData[i].data};
+                }
+            }
+        });
+
+        globalWeatherData.forEach(function (yearGlobalData) {
+            yearGlobalData.data = yearGlobalData.data / (allCountriesWeatherData.length - countOfCountriesWithNoData);
+        })
+        return globalWeatherData;
     }
 }
