@@ -64,8 +64,25 @@ function ViewController () {
 
     function initBasicWeatherFilters() {
         weatherService.getPossibleCountriesToSelect(function (countries) {
-            countries.forEach(function (country) {
-                addOptionToSelection(country.name, country.alpha3Code, $("#countrySelection"));
+            $('#countrySelection').autocomplete({
+                minLength: 1,
+                source: JSON.stringify(countries),
+                focus: function(event, ui) {
+                    $('#countrySelection').val(ui.item.name);
+                    return false;
+                },
+
+                select: function(event, ui) {
+                },
+
+                open: function(event, ui) {
+                },
+
+                change: function (event, ui) {
+                    if (ui.item === null) {
+                        $(this).val('');
+                    }
+                }
             });
         });
 
