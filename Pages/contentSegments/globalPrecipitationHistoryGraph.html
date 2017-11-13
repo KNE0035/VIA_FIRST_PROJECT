@@ -1,13 +1,9 @@
 <div>
     <h2>
-        Zvolte prosím pro jakou zem a časový interval chcete vygenerovat graf historie změny teploty
+        Zvolte prosím časový interval pro který chcete vygenerovat globální graf historie změny teploty
     </h2>
 
     <form id="basicGraphFilter">
-        <label for="countrySelection">Země:</label>
-        <input type="text" id="countrySelection" >
-        <input type="hidden" id="alpha3Code">
-
         <label for="yearFromSelection">Od roku:</label>
         <select id="yearFromSelection" name="yearFromSelection">
             <option value="no selected">Nevybráno</option>
@@ -18,7 +14,7 @@
             <option value="no selected">Nevybráno</option>
         </select>
         <br>
-        <input type="button" value="Sumbit" onclick="viewController.drawHistoryGraph(TEMPERATURE_TYPE_CHANGE)">
+        <input type="button" value="Sumbit" onclick="viewController.drawGlobalHistoryGraph(PRECIPITATION_TYPE_CHANGE)">
     </form>
-    <div id="historyGraph"></div>
+    <div id="globalHistoryGraph"></div>
 </div>

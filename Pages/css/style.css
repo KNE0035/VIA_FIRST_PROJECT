@@ -100,16 +100,15 @@ table tr:first-child td{
 
 /*style inputs*/
 input[type=text], select {
-    width: 100%;
     padding: 12px 20px;
     margin: 15px;
     display: inline-block;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-    min-width: 20%;
-    max-width: 200px;
     overflow:auto;
+    width: 150px;
+    height: 45px;
 }
 
 input[type=button] {
@@ -129,7 +128,7 @@ input[type=submit]:hover {
 }
 
 .inputInvalid {
-    border: red 1px solid;
+    border: red 1px solid !important;
 }
 
 /*content*/

@@ -5,7 +5,6 @@ toastr.options = {
 }
 
 $( document ).ready(function() {
-    console.log( "ready!" );
     $("#header").load("navigationSegments/topNav.html");
     viewController.resolveViewContent();
 });
@@ -59,30 +58,33 @@ function ViewController () {
             case "globalTemperatureGraph":
                 resolveViewForGlobalTemperatureHistoryGraphContent();
                 break;
+            case "globalPrecipitationGraph":
+                resolveViewForGlobalPrecipitationHistoryGraphContent();
+                break;
         }
     }
 
     function initBasicWeatherFilters() {
         weatherService.getPossibleCountriesToSelect(function (countries) {
-            $('#countrySelection').autocomplete({
+            var countriesForSelect = [{}];
+
+            countries.forEach(function (item) {
+                countriesForSelect.push({alpha3Code: item.alpha3Code, value: item.name, label: item.name})
+            })
+
+            $("#countrySelection").autocomplete({
+                source: countriesForSelect,
                 minLength: 1,
-                source: JSON.stringify(countries),
-                focus: function(event, ui) {
-                    $('#countrySelection').val(ui.item.name);
-                    return false;
-                },
-
-                select: function(event, ui) {
-                },
-
-                open: function(event, ui) {
-                },
-
+                // mustMatch implementation
                 change: function (event, ui) {
                     if (ui.item === null) {
                         $(this).val('');
                     }
-                }
+                },
+                select: function(event, ui) {
+                    // feed hidden id field
+                    $("#alpha3Code").val(ui.item.alpha3Code);
+                },
             });
         });
 
@@ -112,6 +114,12 @@ function ViewController () {
         });
     }
 
+    function resolveViewForGlobalPrecipitationHistoryGraphContent() {
+        $("#content").load("contentSegments/globalPrecipitationHistoryGraph.html", function () {
+            initBasicWeatherFilters();
+        });
+    }
+
     function addOptionToSelection(text, value, selection) {
         var opt = document.createElement('option');
         opt.innerHTML = text;
@@ -119,8 +127,8 @@ function ViewController () {
         selection.append(opt);
     }
 
-    ViewController.prototype.drawHistoryPrecipitationGraph = function () {
-        weatherService.getHistoryWeatherDataByCriteria({ country: $( "#countrySelection" ).val(), fromYear: $( "#yearFromSelection" ).val(), toYear: $( "#yearToSelection" ).val()},function (historyTemperatureData, validationObj) {
+    ViewController.prototype.drawHistoryGraph = function (typeOfChange) {
+        weatherService.getHistoryWeatherDataByCriteria({ country: $( "#alpha3Code" ).val(), fromYear: $( "#yearFromSelection" ).val(), toYear: $( "#yearToSelection" ).val()},function (historyTemperatureData, validationObj) {
             $( "#countrySelection" ).removeClass( "inputInvalid" );
             $( "#yearFromSelection" ).removeClass( "inputInvalid" );
             $( "#yearToSelection" ).removeClass( "inputInvalid" );
@@ -128,13 +136,18 @@ function ViewController () {
             if(!validationObj.isValid){
                 resolveValidationMesseages(validationObj);
             } else {
-                drawHistoryWeatherGraph(historyTemperatureData, "precipitationHistoryGraph", PRECIPITATION_TYPE_CHANGE, 'Graf vývoje průměrné hodnoty srážek za rok, týkající se země: ' + $("#countrySelection option:selected").text());
+                if(typeOfChange == TEMPERATURE_TYPE_CHANGE){
+                    graphName = 'Graf vývoje průměrné teploty, týkající se země: '
+                } else {
+                    graphName = 'Graf vývoje průměrné hodnoty srážek, týkající se země: '
+                }
+                graphName = graphName + $("#countrySelection").val()
+                drawHistoryWeatherGraph(historyTemperatureData, "historyGraph", typeOfChange, graphName);
             }
-        }, PRECIPITATION_TYPE_CHANGE)
+        }, typeOfChange)
     }
 
-
-    ViewController.prototype.drawGlobalHistoryTemperatureGraph = function () {
+    ViewController.prototype.drawGlobalHistoryGraph = function (typeOfChange) {
         weatherService.getGlobalHistoryWeatherDataByCriteria({ fromYear: $( "#yearFromSelection" ).val(), toYear: $( "#yearToSelection" ).val()},function (globalHistoryTemperatureData, validationObj) {
             $( "#yearFromSelection" ).removeClass( "inputInvalid" );
             $( "#yearToSelection" ).removeClass( "inputInvalid" );
@@ -142,24 +155,15 @@ function ViewController () {
             if(!validationObj.isValid){
                 resolveValidationMesseages(validationObj);
             } else {
-                drawHistoryWeatherGraph(globalHistoryTemperatureData, "globalHistoryTemperatureGraph", TEMPERATURE_TYPE_CHANGE, 'Globální graf vývoje průměrné teploty za rok')
+                var graphName = ""
+                if(typeOfChange == TEMPERATURE_TYPE_CHANGE){
+                    graphName = "Globální graf vývoje průměrné teploty"
+                } else {
+                    graphName = "Globální graf vývoje průměrných srážek"
+                }
+                drawHistoryWeatherGraph(globalHistoryTemperatureData, "globalHistoryGraph", typeOfChange, graphName)
             }
-        }, TEMPERATURE_TYPE_CHANGE)
-    }
-
-
-    ViewController.prototype.drawHistoryTemperatureGraph = function () {
-        weatherService.getHistoryWeatherDataByCriteria({ country: $( "#countrySelection" ).val(), fromYear: $( "#yearFromSelection" ).val(), toYear: $( "#yearToSelection" ).val()},function (historyTemperatureData, validationObj) {
-            $( "#countrySelection" ).removeClass( "inputInvalid" );
-            $( "#yearFromSelection" ).removeClass( "inputInvalid" );
-            $( "#yearToSelection" ).removeClass( "inputInvalid" );
-
-            if(!validationObj.isValid){
-                resolveValidationMesseages(validationObj);
-            } else {
-                drawHistoryWeatherGraph(historyTemperatureData, "temperatureHistoryGraph", TEMPERATURE_TYPE_CHANGE, 'Graf vývoje průměrné teploty za rok, týkající se země: ' + $("#countrySelection option:selected").text());
-            }
-        }, TEMPERATURE_TYPE_CHANGE)
+        }, typeOfChange)
     }
 
     function resolveValidationMesseages(validationObj) {
@@ -223,7 +227,7 @@ function ViewController () {
                     }
                 },
                 vAxis: {
-                    title: typeOfChange === TEMPERATURE_TYPE_CHANGE ? "% Celosia" : "Srážky v mm vody",
+                    title: typeOfChange === TEMPERATURE_TYPE_CHANGE ? "°Celsia" : "Srážky v mm vody",
                     titleTextStyle: {
                         fontSize: 16,
                     }

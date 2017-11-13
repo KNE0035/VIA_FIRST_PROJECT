@@ -5,9 +5,8 @@
 
     <form id="basicGraphFilter">
         <label for="countrySelection">Země:</label>
-        <select id="countrySelection" name="countrySelection">
-            <option value="" selected>Vyberte zemi</option>
-        </select>
+        <input type="text" id="countrySelection" >
+        <input type="hidden" id="alpha3Code">
 
         <label for="yearFromSelection">Od roku:</label>
         <select id="yearFromSelection" name="yearFromSelection">
@@ -19,7 +18,7 @@
             <option value="no selected">Nevybráno</option>
         </select>
         <br>
-        <input type="button" value="Sumbit" onclick="viewController.drawHistoryPrecipitationGraph()">
+        <input type="button" value="Sumbit" onclick="viewController.drawHistoryGraph(PRECIPITATION_TYPE_CHANGE)">
     </form>
-    <div id="precipitationHistoryGraph"></div>
+    <div id="historyGraph"></div>
 </div>
