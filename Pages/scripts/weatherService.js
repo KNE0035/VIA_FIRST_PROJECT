@@ -56,6 +56,7 @@ function WeatherService() {
 
         allCountriesWeatherData = [];
 
+        $("body").addClass("loading");
         possibleCountriesToSelect.forEach(function (country) {
             $.ajax({
                 url: baseUrlWithCriteria + country.alpha3Code,
@@ -95,6 +96,7 @@ function WeatherService() {
         }
 
         var urlWithCriteria;
+
         if(typeOfChange === TEMPERATURE_TYPE_CHANGE){
             urlWithCriteria = "http://climatedataapi.worldbank.org/climateweb/rest/v1/country/cru/tas/year/" + weatherCriteria.country;
         } else if(typeOfChange === PRECIPITATION_TYPE_CHANGE){

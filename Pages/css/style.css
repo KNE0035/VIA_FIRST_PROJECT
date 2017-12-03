@@ -63,40 +63,11 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
     color: #FFFFFF;
 }
 
-
-table{
-    border: 2px solid black;
-    border-collapse: collapse;
-    background-color: #FFFFFF;
-    margin: 1em 0;
-}
-
-table td{
-    border: 1px solid grey;
-    padding: 5px;
-    margin: 0;
-    font-size: 11px;
-    font-size: 17px;
-}
-
 table tr:first-child td{
     background-color: #777777;
     color: white;
     border-color: white;
 }
-
-#schedule tr td:first-child{
-    background-color: #777777;
-    color: white;
-    border-color: white;
-}
-
-#schedule .excercise{
-    border: 1px solid blue;
-    border-style: double;
-    background: #ddddff;
-}
-
 
 /*style inputs*/
 input[type=text], select {
@@ -136,4 +107,30 @@ input[type=submit]:hover {
     margin-left: 300px;
     margin-right: 100px;
     margin-top: 50px;
+}
+
+.modal {
+    display:    none;
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 )
+    url('http://i.stack.imgur.com/FhHRx.gif')
+    50% 50%
+    no-repeat;
+}
+
+/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+body.loading {
+    overflow: hidden;
+}
+
+/* Anytime the body has the loading class, our
+   modal element will be visible */
+body.loading .modal {
+    display: block;
 }

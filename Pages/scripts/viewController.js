@@ -28,38 +28,26 @@ function ViewController () {
             linkValue = url.substr(url.lastIndexOf("#") + 1);
         }
 
-
-
-        if (linkValue === "home" || linkValue === "schedule" || linkValue === "contact" || linkValue === "baseInfo" || linkValue == "index") {
-            $("#sideBar").load("navigationSegments/homeSideBar.html");
-        } else {
-            $("#sideBar").load("navigationSegments/weatherGraphsSideBar.html");
-        }
-
         switch (linkValue) {
-            case "home":
-            case "baseInfo":
-            case "index":
-                $("#content").load("contentSegments/baseInfo.html");
-                break;
-            case "schedule":
-                $("#content").load("contentSegments/schedule.html");
-                break;
-            case "contact":
-                $("#content").load("contentSegments/contact.html");
-                break;
             case "weatherGraphs":
             case "temperatureHistoryGraph":
+                $("#sideBar").load("navigationSegments/weatherGraphsSideBar.html");
                 resolveViewForTemperatureHistoryGraphContent();
                 break;
             case "precipitationHistoryGraph":
+                $("#sideBar").load("navigationSegments/weatherGraphsSideBar.html");
                 resolveViewForPrecipitationHistoryGraphContent();
                 break;
             case "globalTemperatureGraph":
+                $("#sideBar").load("navigationSegments/weatherGraphsSideBar.html");
                 resolveViewForGlobalTemperatureHistoryGraphContent();
                 break;
             case "globalPrecipitationGraph":
+                $("#sideBar").load("navigationSegments/weatherGraphsSideBar.html");
                 resolveViewForGlobalPrecipitationHistoryGraphContent();
+                break;
+            default:
+                $("#sideBar").load("navigationSegments/weatherGraphsSideBar.html")
                 break;
         }
     }
@@ -161,7 +149,8 @@ function ViewController () {
                 } else {
                     graphName = "Globální graf vývoje průměrných srážek"
                 }
-                drawHistoryWeatherGraph(globalHistoryTemperatureData, "globalHistoryGraph", typeOfChange, graphName)
+                drawHistoryWeatherGraph(globalHistoryTemperatureData, "globalHistoryGraph", typeOfChange, graphName);
+                $("body").removeClass("loading");
             }
         }, typeOfChange)
     }
